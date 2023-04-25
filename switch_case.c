@@ -80,7 +80,7 @@ Task** read_all_tasks_from_file(const char *filepath, int *num_tasks) {
     fp = fopen(filepath, "r");
     if (fp == NULL) {
         printf("Error: could not open file\n");
-        return 1;
+        return NULL;
     }
 
     // Read the file line by line
@@ -251,9 +251,7 @@ int main() {
                 printf("2. Sorting by priority \n");
                 printf("3. Sorting by deadline \n");
                 printf("Option: ");
-                scanf("%d", sort_option);
-                
-                printf("%d", sort_option);
+                sort_option = atoi(input);
                 
                 switch (sort_option)
                 {
