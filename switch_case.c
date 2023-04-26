@@ -350,23 +350,20 @@ int main() {
                 printf("2. Sorting by priority \n");
                 printf("3. Sorting by deadline \n");
                 printf("Option: ");
-                sort_option = atoi(input);
-                
-                printf("%d", &sort_option);
-                
+                scanf("%d", &sort_option);
                 
                 switch (sort_option)
                 {
                     case 1:
                         task_ls();
-                        break;
+                        
                     case 2:
                         task_ls_priority();
-                        break;
+                        
                     
                     case 3:
                         task_ls_deadline();
-                        break;
+                        
                 
                     default:
                         printf("Invalid option. Please enter a valid option.\n");
