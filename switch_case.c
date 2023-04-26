@@ -80,7 +80,7 @@ Task** read_all_tasks_from_file(const char *filepath, int *num_tasks) {
     fp = fopen(filepath, "r");
     if (fp == NULL) {
         printf("Error: could not open file\n");
-        return NULL;
+        return 1;
     }
 
     // Read the file line by line
@@ -215,10 +215,105 @@ void task_add(int task_priority, char* task_text, Date *d, const char *filepath)
     printf("%s", task_str);
 }
 
+/*Delete task from task.txt*/
+void task_del(int task_index, const char *filepath) {
+    int num_tasks = 0;
+    Task **task_list = read_all_tasks_from_file(filepath, &num_tasks);
+    if (task_list == NULL || num_tasks == 0) {
+        printf("Error: task list is empty or file not found\n");
+        return;
+    }
+    if (task_index < 0 || task_index >= num_tasks) {
+        printf("Index %d does not exist\n", task_index);
+        return;
+    }
+    Task *task_to_delete = task_list[task_index];
+    free(task_to_delete);
+    for (int i = task_index; i < num_tasks - 1; i++) {
+        task_list[i] = task_list[i + 1];
+    }
+    task_list[num_tasks - 1] = NULL;
+    num_tasks--;
+    printf("Deleted task at index %d:\n%s\n", task_index, get_printable_task(task_to_delete));
+
+    // print after deleting task
+    printf("List of incomplete task after deleting: \n");
+    for (int i = 0; i < num_tasks; i++) {
+        printf("%d. ", i+1);
+        printf("%s", get_printable_task(*(task_list + i)));
+    }
+
+    // fix txt file
+    FILE *f = fopen(filepath, "w");
+    for (int i = 0; i < num_tasks; i++) {
+        fprintf(f, "%s", get_printable_task(task_list[i]));
+    }
+    fclose(f);
+    
+    free(task_to_delete);
+    free(task_list);
+}
+
+void task_ls_remind() {
+
+    time_t t = time(NULL);
+    struct tm *local_time = localtime(&t);
+    int uncompleted_today_count = 0;
+    int uncompleted_future_count = 0;
+
+    printf("\n\nCurrent local date: %02d/%02d/%04d\n", local_time->tm_mday, local_time->tm_mon + 1, local_time->tm_year + 1900);
+
+    int num_tasks = 0;
+
+    // Use read_all_tasks_from_file() to read the list of tasks from the file
+    Task **task_list = read_all_tasks_from_file("task.txt", &num_tasks);
+    if (task_list == NULL) {
+        printf("\n\nNo tasks to do.");
+        return;
+    }
+    
+    // sort the tasks in the list by priority using qsort()
+    qsort(task_list, num_tasks, sizeof(Task*), compare_tasks_priority);
+
+    printf("\nRemind incomplete tasks today in priority order:\n");
+    
+    // display all contents whose deadline is the same as the date today by iterating using get_printable_task() 
+    for (int i = 0; i < num_tasks; i++) {
+        if ((*(task_list + i))->deadline.day == local_time->tm_mday && (*(task_list + i))->deadline.month == (local_time->tm_mon + 1) && (*(task_list + i))->deadline.year == (local_time->tm_year + 1900)) {
+            printf("%d. ", i+1);
+            printf("%s", get_printable_task(*(task_list + i)));
+            uncompleted_today_count ++;
+        }
+        
+    }
+    if (uncompleted_today_count == 0) {
+        printf("\nNo tasks have deadline today.\n");
+    }
+    printf("The number of incomplete tasks today: %d\n",uncompleted_today_count);
+
+    // print into task_remind.txt file
+    FILE *f = fopen("task_remind.txt", "w");
+    for (int i = 0; i < num_tasks; i++) {
+        if ((*(task_list + i))->deadline.day == local_time->tm_mday && (*(task_list + i))->deadline.month == (local_time->tm_mon + 1) && (*(task_list + i))->deadline.year == (local_time->tm_year + 1900)) {
+            fprintf(f,"%d. ", i+1);
+            fprintf(f, "%s", get_printable_task(*(task_list + i)));
+        }
+        
+    }
+    if (uncompleted_today_count == 0) {
+        fprintf(f, "\nNo tasks have deadline today.\n");
+    }
+    fprintf(f,"The number of incomplete tasks today: %d\n",uncompleted_today_count);   
+
+    fclose(f);
+}
+
+
 int main() {
     char input[STD_STRING_SIZE];
     int option;
     int sort_option;
+    int delete_index;
     char task_text[STD_STRING_SIZE];
     int task_priority, task_day, task_month, task_year;
 
@@ -226,7 +321,8 @@ int main() {
         printf("Enter an option:\n");
         printf("1. Add a task\n");
         printf("2. Display all tasks\n");
-        printf("3. Complete a task\n");
+        printf("3. Delete a task\n");
+        printf("4.Show today tasks \n");
         printf("0. Exit\n");
         printf("Option: ");
         fgets(input, sizeof(input), stdin);
@@ -253,6 +349,9 @@ int main() {
                 printf("Option: ");
                 sort_option = atoi(input);
                 
+                printf("%d", &sort_option);
+                
+                
                 switch (sort_option)
                 {
                     case 1:
@@ -270,7 +369,24 @@ int main() {
                         printf("Invalid option. Please enter a valid option.\n");
                 };
                 
+
+               if (sort_option == 1) {
+                    task_ls();
+               } else if (sort_option == 2) {
+                    task_ls_priority();
+               } else if (sort_option == 3) {
+                    task_ls_priority();
+               }
+                
                 break;
+
+            case 3:
+                printf("Type in the index of the tasks you want to delete: ");
+                scanf("%d", &delete_index);
+                task_del(delete_index, "task.txt");
+
+            case 4: 
+                task_ls_remind();
 
             case 0:
                 printf("Exiting program...\n");
