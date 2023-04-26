@@ -70,9 +70,6 @@ Task* _read_single_task_from_filestream(FILE*);
 Task** read_all_tasks_from_file(const char*, int*);
 
 
-
-
-
 Task* initialize_task(const char *text, int priority, Date *d) {
     Task *new_task = (Task*)malloc(sizeof(Task));
     strcpy(new_task->text, text);
@@ -214,7 +211,7 @@ void task_ls_priority() {
     // Use read_all_tasks_from_file() to read the list of tasks from the file
     Task **task_list = read_all_tasks_from_file("task.txt", &num_tasks);
     if (task_list == NULL) {
-        printf("\n\nNo tasks to do.");
+        printf("\n\nNo tasks to do. \n");
         return;
     }
     
@@ -433,21 +430,22 @@ int main() {
     printf("------TASK MANAGEMENT----- \n");
 
     do {
-        printf("------MENU------- \n");
+        printf("\n------MENU------- \n");
         printf("Enter an option:\n");
         printf("1. Add a task\n");
         printf("2. Display all tasks\n");
         printf("3. Delete a task\n");
-        printf("4.Show today tasks \n");
+        printf("4. Show today tasks \n");
         printf("0. Exit\n");
         printf("Option: ");
-        // fgets(input, sizeof(input), stdin);
+        //fgets(input, sizeof(input), stdin);
         // option = atoi(input);
         scanf("%d", &option);
 
         switch (option) {
             case 1:
                 printf("Enter task text: ");
+                getchar();
                 fgets(task_text, sizeof(task_text), stdin);
                 printf("Enter task priority: ");
                 fgets(input, sizeof(input), stdin);
@@ -467,23 +465,6 @@ int main() {
                 printf("Option: ");
                 scanf("%d", &sort_option);
                 
-                // switch (sort_option)
-                // {
-                //     case 1:
-                //         task_ls();
-                        
-                //     case 2:
-                //         task_ls_priority();
-                        
-                    
-                //     case 3:
-                //         task_ls_deadline();
-                        
-                
-                //     default:
-                //         printf("Invalid option. Please enter a valid option.\n");
-                // };
-                
 
                if (sort_option == 1) {
                     task_ls();
@@ -492,7 +473,7 @@ int main() {
                     task_ls_priority();
                     free(sort_option);
                } else if (sort_option == 3) {
-                    task_ls_priority();
+                    task_ls_deadline();
                     free(sort_option);
                }
                 free(option);
