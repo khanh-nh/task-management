@@ -316,8 +316,11 @@ int main() {
     int delete_index;
     char task_text[STD_STRING_SIZE];
     int task_priority, task_day, task_month, task_year;
+    
+    printf("------TASK MANAGEMENT----- \n");
 
     do {
+        printf("------MENU------- \n");
         printf("Enter an option:\n");
         printf("1. Add a task\n");
         printf("2. Display all tasks\n");
